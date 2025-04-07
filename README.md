@@ -23,7 +23,22 @@ simple script to extract wifi passwords in Windows
 Just console version.
 
 ## Project Status
-Project is probably in progress.
+Project in progress. I want to add:
+- Display a list of all devices connected to the network (ARP table).
+- Check recent Bluetooth connections.
+- Retrieve a list of active processes and their memory/CPU usage.
+- Search for saved system restore points.
+- Check CPU temperature (e.g., via WMIC or another CLI tool).
+- List all programs installed on the system (via WMIC).
+- Show connection history to different WiFi networks with timestamps.
+- Automatically scan nearby WiFi networks and display their parameters (signal strength, channel, security).
+- Extract Windows license and licenses of installed programs.
+- Monitor open ports and listening applications (netstat).
+- Dump network configuration (ipconfig /all) and analyze details like DNS, gateway, DHCP.
+- Retrieve and analyze system event logs.
+- Check scheduled tasks and running scripts (schtasks).
+- Read BIOS information such as version, date, and manufacturer.
+- Check which applications run at system startup (autoruns).
 
 ## Room for Improvement
 - add other posibilities for save found passwords
